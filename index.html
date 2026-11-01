@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0F7F78">
+<title>مران الكتابة</title>
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Rubik:wght@600;700;800&display=swap">
+<style>
+/* Layout: an exam-room workstation — a quiet top bar of modes, one wide "answer sheet" card where typing happens in a monospace line, and a live keycap keyboard under it that lights the next key in its finger's colour. */
+:root{
+  --bg:#E9EDF3; --sheet:#FFFFFF; --sunk:#F1F4F8; --line:#D6DDE7; --ink:#131A2B; --ink2:#3C465E; --muted:#6B768E;
+  --accent:#0F7F78; --accent-ink:#FFFFFF; --caret:#E8A317; --ok:#13875B; --ok-soft:#DDF4EA; --err:#CF3448; --err-soft:#FCE4E7;
+  --f1:#F29E8E; --f2:#F6C46B; --f3:#9AD48C; --f4:#86C3EE; --f5:#C6A6EE; --thumb:#D9DEE6;
+  --ui:"IBM Plex Sans Arabic","Noto Sans Arabic","Segoe UI",Tahoma,system-ui,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --display:"Rubik","IBM Plex Sans Arabic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#0E131D; --sheet:#171E2C; --sunk:#121826; --line:#2A3448; --ink:#E8EDF7; --ink2:#C2CADB; --muted:#8994AC;
+  --accent:#2BB5AB; --accent-ink:#04201E; --caret:#F2B53A; --ok:#3CCB8E; --ok-soft:#10372A; --err:#FF6B7D; --err-soft:#3E1722;
+  --f1:#A9574A; --f2:#A9802F; --f3:#4F8A45; --f4:#3F7AA6; --f5:#7457A8; --thumb:#2E3850}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#0E131D; --sheet:#171E2C; --sunk:#121826; --line:#2A3448; --ink:#E8EDF7; --ink2:#C2CADB; --muted:#8994AC;
+  --accent:#2BB5AB; --accent-ink:#04201E; --caret:#F2B53A; --ok:#3CCB8E; --ok-soft:#10372A; --err:#FF6B7D; --err-soft:#3E1722;
+  --f1:#A9574A; --f2:#A9802F; --f3:#4F8A45; --f4:#3F7AA6; --f5:#7457A8; --thumb:#2E3850}
+
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);font-size:16px;line-height:1.6;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--sheet)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.25;text-wrap:balance}
+.en{font-family:var(--mono);direction:ltr;unicode-bidi:isolate}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--sheet);border-bottom:1px solid var(--line)}
+.top .in{max-width:1020px;margin:0 auto;display:flex;align-items:center;gap:14px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:800;font-size:20px;white-space:nowrap}
+.brand .k{width:34px;height:34px;border-radius:9px;background:var(--ink);color:var(--sheet);display:grid;place-items:center;font-family:var(--mono);font-size:17px;box-shadow:0 3px 0 var(--accent)}
+.modes{display:flex;gap:4px;flex-wrap:wrap;flex:1;min-width:0}
+.modes a{padding:7px 12px;border-radius:9px;color:var(--ink2);text-decoration:none;font-weight:600;font-size:15px;white-space:nowrap}
+.modes a:hover{background:var(--sunk)}
+.modes a[aria-current="page"]{background:var(--ink);color:var(--sheet)}
+.wrap{max-width:1020px;margin:0 auto;padding-block:22px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px;grid-template-columns:minmax(0,1fr)}
+
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:14px;min-width:0}
+.head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:4px 14px}
+.head h1{font-size:26px}
+.head p{margin:0;color:var(--muted);grid-column:1/-1;max-width:70ch}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:700;background:var(--accent);color:var(--accent-ink);display:inline-flex;align-items:center;gap:8px}
+.btn.ghost{background:var(--sunk);color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:7px 12px;font-size:14px}
+.btn:disabled{opacity:.45;cursor:default}
+select{max-width:100%;min-width:0}
+.bar>*{min-width:0}
+select,.inp{font:inherit;background:var(--sunk);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.kbd{font-family:var(--mono);font-size:13px;background:var(--sunk);border:1px solid var(--line);border-bottom-width:3px;border-radius:6px;padding:1px 7px;direction:ltr;display:inline-block}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat{background:var(--sunk);border-radius:12px;padding:10px 12px;display:grid;gap:0}
+.stat b{font-family:var(--mono);font-size:24px;font-weight:600}
+.stat span{font-size:13px;color:var(--muted)}
+
+/* the typing line */
+.target{font-family:var(--mono);direction:ltr;text-align:left;font-size:clamp(19px,2.6vw,25px);line-height:1.9;background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:16px 18px;white-space:pre-wrap;word-break:break-word;cursor:text;position:relative;min-height:84px;overflow-wrap:anywhere}
+.target .c{color:var(--muted)}
+.target .c.ok{color:var(--ink)}
+.target .c.bad{color:var(--err);background:var(--err-soft);border-radius:3px}
+.target .c.cur{box-shadow:inset 0 -3px 0 var(--caret);background:color-mix(in srgb,var(--caret) 18%,transparent);border-radius:3px;color:var(--ink)}
+.target.blur{filter:blur(5px)}
+.target .hint{position:absolute;inset:auto 12px 8px auto;font-family:var(--ui);font-size:13px;color:var(--muted);direction:rtl}
+.trap{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;left:0;top:0}
+.answer{font-family:var(--mono);direction:ltr;text-align:left;font-size:22px;width:100%;background:var(--sheet);color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:12px 14px}
+.answer:focus{border-color:var(--accent);outline:none}
+.answer.ok{border-color:var(--ok);background:var(--ok-soft)}
+.answer.bad{border-color:var(--err);background:var(--err-soft)}
+textarea.answer{min-height:96px;resize:vertical;line-height:1.6;font-size:19px}
+.prompt{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.prompt .ar{font-size:26px;font-weight:700;flex:1;min-width:200px}
+.prompt .meta{font-size:14px;color:var(--muted)}
+.say{width:52px;height:52px;border-radius:14px;border:0;background:var(--ink);color:var(--sheet);display:grid;place-items:center;flex:none}
+.say svg{width:24px;height:24px}
+.say.slow{background:var(--sunk);color:var(--ink);border:1px solid var(--line)}
+.fb{border-radius:12px;padding:12px 14px;display:grid;gap:4px}
+.fb.ok{background:var(--ok-soft)} .fb.bad{background:var(--err-soft)}
+.fb b{font-size:17px}
+.fb.ok b{color:var(--ok)} .fb.bad b{color:var(--err)}
+.diff{font-family:var(--mono);direction:ltr;text-align:left;font-size:18px;line-height:1.8;overflow-wrap:anywhere}
+.diff .ok{color:var(--ok)} .diff .miss{color:var(--err);text-decoration:underline wavy;text-underline-offset:4px} .diff .x{color:var(--err);text-decoration:line-through}
+.progress{height:6px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+
+/* the keyboard */
+.kb{display:grid;gap:6px;direction:ltr;user-select:none;padding:12px;background:var(--sunk);border:1px solid var(--line);border-radius:14px;max-width:100%;overflow-x:auto}
+.kr{display:flex;gap:6px}
+.key{flex:1 1 0;min-width:0;width:auto;height:44px;border-radius:8px;background:var(--sheet);border:1px solid var(--line);border-bottom-width:3px;display:grid;place-items:center;font-family:var(--mono);font-size:15px;color:var(--ink2);position:relative;transition:transform .05s}
+.key small{position:absolute;top:2px;left:5px;font-size:10px;color:var(--muted)}
+.key.w15{flex-grow:1.5} .key.w175{flex-grow:1.8} .key.w2{flex-grow:2.3} .kr:last-child{justify-content:center} .key.space{flex:0 0 46%}
+.key[data-f="1"]{background:color-mix(in srgb,var(--f1) 35%,var(--sheet))} .key[data-f="2"]{background:color-mix(in srgb,var(--f2) 35%,var(--sheet))} .key[data-f="3"]{background:color-mix(in srgb,var(--f3) 35%,var(--sheet))} .key[data-f="4"]{background:color-mix(in srgb,var(--f4) 35%,var(--sheet))} .key[data-f="5"]{background:color-mix(in srgb,var(--f5) 35%,var(--sheet))} .key[data-f="0"]{background:var(--thumb)}
+.key.home::after{content:"";position:absolute;bottom:6px;width:10px;height:2px;border-radius:2px;background:var(--ink2)}
+.key.next{outline:3px solid var(--caret);outline-offset:1px;transform:translateY(-2px);color:var(--ink);font-weight:700}
+.key.down{transform:translateY(2px);border-bottom-width:1px}
+.key.missed{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--err) var(--heat,0%),transparent)}
+.fingers{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.fingers span{display:inline-flex;align-items:center;gap:5px}
+.fingers i{width:12px;height:12px;border-radius:4px;display:inline-block}
+.lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.lesson{background:var(--sunk);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:start;display:grid;gap:2px}
+.lesson b{font-size:15px}
+.lesson .en{font-size:13px;color:var(--muted)}
+.lesson[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.lesson .done{font-size:12.5px;color:var(--ok);font-weight:700}
+
+/* home */
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:6px;text-decoration:none;color:inherit;align-content:start}
+.card:hover{border-color:var(--accent)}
+.card .t{font-family:var(--display);font-weight:700;font-size:18px}
+.card p{margin:0;color:var(--muted);font-size:14.5px}
+.card .go{color:var(--accent);font-weight:700;font-size:14px;margin-top:4px}
+.chart{width:100%;height:150px;display:block}
+.tbl{width:100%;border-collapse:collapse;font-size:14.5px}
+.tbl th,.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:start}
+.tbl td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tblw{overflow-x:auto}
+.report{display:grid;gap:12px}
+.note{font-size:14px;color:var(--muted);margin:0}
+.toast{position:fixed;inset:auto 16px calc(18px + env(safe-area-inset-bottom,0px));z-index:60;max-width:420px;margin:0 auto;background:var(--ink);color:var(--sheet);padding:10px 14px;border-radius:12px;text-align:center;font-weight:600}
+@media (max-width:760px){.modes{flex-wrap:nowrap;overflow-x:auto;flex-basis:100%;scrollbar-width:none}.modes::-webkit-scrollbar{display:none}.bar select{flex:1 1 100%;width:100%}.cards{grid-template-columns:minmax(0,1fr)}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.key{height:36px;font-size:12px}.key small{display:none}.kb{gap:4px;padding:8px}.kr{gap:4px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<header class="top"><div class="in">
+  <div class="brand"><span class="k">⌨</span>مران الكتابة</div>
+  <nav class="modes" id="modes">
+    <a href="#home">البداية</a><a href="#keys">لوحة المفاتيح</a><a href="#words">كتابة الكلمات</a><a href="#dictation">الإملاء</a><a href="#copy">النسخ والسرعة</a><a href="#exam">اختبار تجريبي</a><a href="#stats">إحصائياتي</a>
+  </nav>
+</div></header>
+<main class="wrap" id="main"><section class="sheet"><h1>مران الكتابة</h1><p class="muted">بنجهّز الكلمات والقصص…</p></section></main>
+<input class="trap" id="trap" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="منطقة الكتابة">
+
+<script src="data.js" charset="utf-8"></script>
+<script>
+(() => {
+'use strict';
+const { S: STORIES, W: RAW } = window.VD;
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const main = $('#main'), trap = $('#trap');
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const AR = n => String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const rnd = a => a[Math.random() * a.length | 0];
+/* exam keyboards have no curly quotes: turn the stories' typography into plain keyboard text */
+const plain = s => String(s).replace(/\*\*/g, '').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/[—–]/g, '-').replace(/…/g, '...').replace(/é/g, 'e').replace(/\s+/g, ' ').trim();
+const normW = s => plain(s).toLowerCase().replace(/[^a-z0-9' -]/g, '').replace(/\s+/g, ' ').trim();
+const toast = m => { $$('.toast').forEach(t => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2400); };
+
+const W = RAW.map((r, i) => ({ i, w: r[0], m: r[1], p: r[2], s: r[5] }));
+STORIES.forEach(s => { s.words = W.filter(w => w.s === s.n).map(w => w.i); });
+const SPK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 9.5v5a1 1 0 0 0 1 1h3l4.6 3.8a.8.8 0 0 0 1.4-.6V5.3a.8.8 0 0 0-1.4-.6L7.5 8.5h-3a1 1 0 0 0-1 1z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+
+/* ---------- saved progress (this browser only) ---------- */
+const KEY = 'miran-typing.v1';
+let P = { runs: [], miss: {}, lessons: {}, words: { ok: 0, n: 0 }, dict: { ok: 0, n: 0 }, best: 0 };
+try { const r = JSON.parse(localStorage.getItem(KEY) || 'null'); if (r) P = Object.assign(P, r); } catch (e) { }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) { } };
+const logRun = (kind, wpm, acc, extra = {}) => { P.runs.push(Object.assign({ t: Date.now(), kind, wpm: Math.round(wpm), acc: Math.round(acc) }, extra)); if (P.runs.length > 300) P.runs.shift(); if (kind !== 'keys') P.best = Math.max(P.best || 0, Math.round(wpm)); save(); };
+const missKey = c => { const k = String(c).toLowerCase(); if (!/^[a-z0-9.,;'"\-\/ ?!:]$/.test(k)) return; P.miss[k] = (P.miss[k] || 0) + 1; };
+
+/* ---------- audio: word clips (a/p*.js) and story recordings (s/*.webm) ---------- */
+const PACK = {}, WAIT = {}, URLS = {};
+window.__ap = (k, obj) => { PACK[k] = obj; (WAIT[k] || []).forEach(f => f()); delete WAIT[k]; };
+function loadPack(k) { return new Promise(res => { if (PACK[k]) return res(); if (WAIT[k]) return WAIT[k].push(res); WAIT[k] = [res]; const sc = document.createElement('script'); sc.src = 'a/p' + k + '.js'; sc.onerror = () => { (WAIT[k] || []).forEach(f => f()); delete WAIT[k]; }; document.head.appendChild(sc); }); }
+async function clipUrl(i) { if (URLS[i]) return URLS[i]; const k = (W[i].s - 1) >> 3; await loadPack(k); const b = PACK[k]?.[i]; if (!b) return null; const bin = atob(b), u = new Uint8Array(bin.length); for (let j = 0; j < bin.length; j++) u[j] = bin.charCodeAt(j); return URLS[i] = URL.createObjectURL(new Blob([u], { type: 'audio/webm' })); }
+const au = new Audio(); const SA = new Audio(); let saStop = 0, saSrc = '';
+function tts(text, rate = .9) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = rate; speechSynthesis.speak(u); } catch (e) { } }
+async function sayWord(i, rate = 1) { try { SA.pause(); } catch (e) { } const url = await clipUrl(i); if (!url) return tts(W[i].w, .85 * rate); au.src = url; au.playbackRate = rate; au.play().catch(() => { }); }
+function playSentence(sn, p, j, rate = 1) {
+  const s = STORIES[sn - 1], tm = s.tm?.[p]?.[j]; if (!tm) return tts(plain(s.ss[p][j]), .85 * rate);
+  try { au.pause(); } catch (e) { } const src = 's/Story_' + String(sn).padStart(2, '0') + '.webm';
+  if (saSrc !== src) { SA.src = src; saSrc = src; }
+  const go = () => { SA.currentTime = Math.max(0, tm[0] - .1); SA.playbackRate = rate; SA.play().catch(() => { }); clearInterval(saStop); saStop = setInterval(() => { if (SA.currentTime >= tm[1] + .05) { SA.pause(); clearInterval(saStop); } }, 40); };
+  if (SA.readyState >= 1) go(); else { SA.addEventListener('loadedmetadata', go, { once: true }); SA.load(); }
+}
+
+/* ---------- the keyboard ---------- */
+const ROWS = [
+  [['`', 1], ['1', 1], ['2', 2], ['3', 3], ['4', 4], ['5', 4], ['6', 4], ['7', 4], ['8', 3], ['9', 2], ['0', 1], ['-', 1], ['=', 1], ['⌫', 1, 'w175']],
+  [['⇥', 1, 'w15'], ['q', 1], ['w', 2], ['e', 3], ['r', 4], ['t', 4], ['y', 4], ['u', 4], ['i', 3], ['o', 2], ['p', 1], ['[', 1], [']', 1], ['\\', 1, 'w15']],
+  [['⇪', 1, 'w175'], ['a', 1], ['s', 2], ['d', 3], ['f', 4], ['g', 4], ['h', 4], ['j', 4], ['k', 3], ['l', 2], [';', 1], ["'", 1], ['↵', 1, 'w2']],
+  [['⇧', 1, 'w2'], ['z', 1], ['x', 2], ['c', 3], ['v', 4], ['b', 4], ['n', 4], ['m', 4], [',', 3], ['.', 2], ['/', 1], ['⇧', 1, 'w2']],
+  [[' ', 0, 'space']],
+];
+const FN = ['الإبهام', 'الخنصر', 'البنصر', 'الوسطى', 'السبابة'];
+const SHIFTED = { '~': '`', '!': '1', '@': '2', '#': '3', '$': '4', '%': '5', '^': '6', '&': '7', '*': '8', '(': '9', ')': '0', '_': '-', '+': '=', '{': '[', '}': ']', '|': '\\', ':': ';', '"': "'", '<': ',', '>': '.', '?': '/' };
+const baseKey = c => c === ' ' ? ' ' : SHIFTED[c] || c.toLowerCase();
+const needsShift = c => !!SHIFTED[c] || (c !== c.toLowerCase());
+const LEFT = new Set('`12345qwertasdfgzxcvb'.split(''));
+function kbHtml(heat) {
+  const mx = Math.max(1, ...Object.values(heat || {}));
+  return `<div class="kb" aria-hidden="true">${ROWS.map(r => `<div class="kr">${r.map(([k, f, cls]) => `<div class="key ${cls || ''} ${'fj'.includes(k) ? 'home' : ''} ${heat && heat[k] ? 'missed' : ''}" data-k="${esc(k)}" data-f="${f}" ${heat && heat[k] ? `style="--heat:${Math.round(70 * heat[k] / mx)}%"` : ''}>${k === ' ' ? 'space' : esc(k)}${heat && heat[k] ? `<small>${heat[k]}</small>` : ''}</div>`).join('')}</div>`).join('')}</div>
+  <div class="fingers">${[1, 2, 3, 4].map(f => `<span><i style="background:var(--f${f})"></i>${FN[f]}</span>`).join('')}<span><i style="background:var(--thumb)"></i>${FN[0]} (المسافة)</span><span>العلامتان على <span class="kbd">F</span> و<span class="kbd">J</span> مكان السبابتين</span></div>`;
+}
+function markNext(c) {
+  $$('.key.next').forEach(k => k.classList.remove('next')); if (c == null) return;
+  const b = baseKey(c); $$('.key').forEach(k => { if (k.dataset.k === b) k.classList.add('next'); });
+  if (needsShift(c)) { const shifts = $$('.key').filter(k => k.dataset.k === '⇧'); const useRight = LEFT.has(b); (useRight ? shifts[1] : shifts[0])?.classList.add('next'); }
+}
+function pressFx(k) { const b = baseKey(k); const el = $$('.key').find(x => x.dataset.k === b); if (el) { el.classList.add('down'); setTimeout(() => el.classList.remove('down'), 90); } }
+
+/* ---------- a typing session over a fixed target text ---------- */
+let TS = null;
+function typer(host, text, opts = {}) {
+  TS = { text, typed: '', errs: 0, t0: 0, t1: 0, opts, host, done: false, keyErr: {} };
+  paintTyper(); focusTrap();
+}
+function paintTyper() {
+  const { text, typed, host, opts } = TS; if (!host.isConnected) return;
+  let h = '';
+  for (let k = 0; k < text.length; k++) {
+    const c = text[k], cls = k < typed.length ? (typed[k] === c ? 'ok' : 'bad') : k === typed.length ? 'cur' : '';
+    h += `<span class="c ${cls}">${c === ' ' && cls === 'bad' ? '·' : esc(c)}</span>`;
+  }
+  host.innerHTML = h + (TS.t0 ? '' : '<span class="hint">اضغط هون وابدأ الكتابة</span>');
+  markNext(TS.done ? null : text[typed.length]);
+  opts.onTick && opts.onTick(liveStats());
+}
+function liveStats() {
+  const { text, typed, errs, t0 } = TS, el = (TS.t1 || Date.now()) - t0, min = t0 ? Math.max(el, 1000) / 60000 : 0;
+  let correct = 0; for (let k = 0; k < typed.length; k++) if (typed[k] === text[k]) correct++;
+  return { wpm: min ? (correct / 5) / min : 0, acc: typed.length + errs ? 100 * (typed.length - errs) / Math.max(1, typed.length) : 100, sec: Math.round(el / 1000), prog: typed.length / text.length, correct, errs };
+}
+function focusTrap() { try { trap.value = ''; trap.focus({ preventScroll: true }); } catch (e) { } }
+trap.addEventListener('keydown', e => {
+  if (!TS || TS.done || !TS.host.isConnected) return;
+  if (e.key === 'Backspace') { e.preventDefault(); if (TS.opts.noBack) return; TS.typed = TS.typed.slice(0, -1); paintTyper(); pressFx('⌫'); return; }
+  if (e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) return;
+  e.preventDefault(); typeChar(e.key);
+});
+trap.addEventListener('input', () => { if (!TS || TS.done) { trap.value = ''; return; } const v = trap.value; trap.value = ''; for (const ch of v) typeChar(ch); });
+trap.addEventListener('paste', e => { e.preventDefault(); toast('اللصق ممنوع هون، متل الاختبار 🙂'); });
+function typeChar(ch) {
+  if (!TS.t0) TS.t0 = Date.now();
+  const want = TS.text[TS.typed.length];
+  if (want == null) return;
+  pressFx(ch);
+  if (ch !== want) { TS.errs++; missKey(baseKey(want)); TS.keyErr[baseKey(want)] = (TS.keyErr[baseKey(want)] || 0) + 1; if (TS.opts.stopOnError) { const el = TS.host.querySelector('.c.cur'); el && el.classList.add('bad'); return; } }
+  TS.typed += ch;
+  if (TS.typed.length >= TS.text.length) { TS.done = true; TS.t1 = Date.now(); paintTyper(); save(); TS.opts.onDone && TS.opts.onDone(liveStats()); return; }
+  paintTyper();
+}
+
+/* ---------- views ---------- */
+const VIEWS = { home: vHome, keys: vKeys, words: vWords, dictation: vDict, copy: vCopy, exam: vExam, stats: vStats };
+function route() {
+  const h = location.hash.slice(1) || 'home', v = VIEWS[h] ? h : 'home';
+  $$('#modes a').forEach(a => { if (a.getAttribute('href') === '#' + v) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  TS = null; try { au.pause(); SA.pause(); } catch (e) { } clearInterval(EXAM.timer); clearInterval(CP.timer);
+  VIEWS[v](); scrollTo(0, 0);
+}
+addEventListener('hashchange', route);
+
+function vHome() {
+  const r = P.runs.filter(x => x.kind === 'copy'), last = r[r.length - 1];
+  main.innerHTML = `<section class="sheet">
+      <div class="head"><h1>جهّز إيدك لاختبار الكمبيوتر</h1><p>كل التمارين من كلماتك وقصصك: ٤٣٦٨ كلمة و٨٨ قصة مسجّلة. الكتابة هون بالإنجليزي على لوحة مفاتيح عادية، والاقتباسات المزخرفة بالقصص بتصير علامات عادية متل الموجودة على الكيبورد.</p></div>
+      <div class="stats"><div class="stat"><b class="num">${last ? last.wpm : '–'}</b><span>آخر سرعة (كلمة/دقيقة)</span></div><div class="stat"><b class="num">${P.best || '–'}</b><span>أفضل سرعة</span></div><div class="stat"><b class="num">${last ? last.acc + '%' : '–'}</b><span>آخر دقّة</span></div><div class="stat"><b class="num">${P.words.n ? Math.round(100 * P.words.ok / P.words.n) + '%' : '–'}</b><span>صح بكتابة الكلمات</span></div></div>
+    </section>
+    <div class="cards">
+      <a class="card" href="#keys"><span class="t">١ · لوحة المفاتيح</span><p>دروس بالترتيب: صف الأساس، الصف العلوي، السفلي، الحروف الكبيرة والعلامات. الكيبورد على الشاشة بيضوّي الحرف الجاي وإصبعه.</p><span class="go">ابدأ ←</span></a>
+      <a class="card" href="#words"><span class="t">٢ · كتابة الكلمات</span><p>بتشوف المعنى وبتسمع الكلمة، وبتكتبها بالإنجليزي. بيصحّحلك حرف حرف.</p><span class="go">ابدأ ←</span></a>
+      <a class="card" href="#dictation"><span class="t">٣ · الإملاء</span><p>بتسمع جملة من القصص بالصوت الأصلي وبتكتبها كاملة. بتقدر تعيد وتبطّئ.</p><span class="go">ابدأ ←</span></a>
+      <a class="card" href="#copy"><span class="t">٤ · النسخ والسرعة</span><p>بتكتب فقرة من قصة والساعة شغّالة، وبتطلعلك السرعة والدقّة.</p><span class="go">ابدأ ←</span></a>
+      <a class="card" href="#exam"><span class="t">٥ · اختبار تجريبي</span><p>١٥ دقيقة: كلمات وإملاء وفقرة، بدون مساعدة، وبالآخر تقرير.</p><span class="go">ابدأ ←</span></a>
+      <a class="card" href="#stats"><span class="t">٦ · إحصائياتي</span><p>تطوّر سرعتك، والمفاتيح اللي بتغلط فيها أكتر على الكيبورد.</p><span class="go">شوف ←</span></a>
+    </div>`;
+}
+
+/* 1 · keyboard lessons: allowed letters grow; drills are real words from the stories that use only those letters */
+const LESSONS = [
+  { n: 'صف الأساس', k: 'asdfjkl;', add: 'asdfjkl;' }, { n: '+ e i', k: 'asdfjkl;ei', add: 'ei' }, { n: '+ r u', k: 'asdfjkl;eiru', add: 'ru' },
+  { n: '+ g h', k: 'asdfjkl;eirugh', add: 'gh' }, { n: '+ t y', k: 'asdfjkl;eirughty', add: 'ty' }, { n: '+ o w', k: 'asdfjkl;eirughtyow', add: 'ow' },
+  { n: '+ n m', k: 'asdfjkl;eirughtyownm', add: 'nm' }, { n: '+ c v b', k: 'asdfjkl;eirughtyownmcvb', add: 'cvb' }, { n: '+ p q x z', k: 'abcdefghijklmnopqrstuvwxyz;', add: 'pqxz' },
+  { n: 'حروف كبيرة', k: '*', add: 'Shift', caps: 1 }, { n: 'علامات', k: '*', add: ", . ' ? !", punct: 1 }, { n: 'أرقام', k: '*', add: '0-9', nums: 1 },
+];
+let LK = 0;
+function lessonText(L) {
+  if (L.add.length === 8 && L.k === L.add) { const drill = ['asdf jkl;', 'fdsa ;lkj', 'aa ss dd ff jj kk ll', 'fj dk sl a;', 'sad lad fall', 'ask flask', 'dad fads all']; return shuffle(drill).slice(0, 5).join(' '); }
+  if (L.caps) { const names = shuffle(W.filter(w => /^[A-Z][a-z]+$/.test(w.w)).map(w => w.w)); const ws = shuffle(W.filter(w => /^[a-z]{3,7}$/.test(w.w)).map(w => w.w)); return Array.from({ length: 10 }, (_, k) => k % 2 ? names[k] || 'Omar' : ws[k][0].toUpperCase() + ws[k].slice(1)).join(' '); }
+  if (L.punct || L.nums) {
+    const sents = []; STORIES.forEach(s => s.ss.forEach(p => p.forEach(x => { const t = plain(x); if (t.length < 70 && (L.nums ? /\d/.test(t) : /[,'?!]/.test(t))) sents.push(t); })));
+    return shuffle(sents).slice(0, 2).join(' ');
+  }
+  const ok = new RegExp('^[' + L.k.replace(/[;]/g, '') + ']+$');
+  const pool = W.map(w => w.w).filter(w => w.length >= 2 && w.length <= 9 && ok.test(w));
+  const fresh = pool.filter(w => [...L.add].some(c => w.includes(c)));
+  const pick = shuffle(fresh.length > 8 ? fresh : pool).slice(0, 9);
+  return pick.join(' ') || L.k.split('').join(' ');
+}
+function vKeys() {
+  const L = LESSONS[LK];
+  main.innerHTML = `<section class="sheet">
+    <div class="head"><h1>لوحة المفاتيح</h1><p>حط أصابعك على صف الأساس: اليسار على <span class="kbd">A S D F</span> واليمين على <span class="kbd">J K L ;</span>. الحرف الجاي بيضوّي على الكيبورد تحت، ولونه بيقلّك أي إصبع. ما تطّلع على إيدك.</p></div>
+    <div class="lessons">${LESSONS.map((l, k) => `<button class="lesson" type="button" data-l="${k}" aria-current="${k === LK}"><b>${AR(k + 1)} · ${esc(l.n)}</b><span class="en">${esc(l.add)}</span>${P.lessons[k] ? `<span class="done">✓ ${P.lessons[k]} ك/د</span>` : ''}</button>`).join('')}</div>
+    <div class="stats"><div class="stat"><b class="num" id="s-wpm">0</b><span>كلمة/دقيقة</span></div><div class="stat"><b class="num" id="s-acc">100%</b><span>الدقّة</span></div><div class="stat"><b class="num" id="s-err">0</b><span>أغلاط</span></div><div class="stat"><b class="num" id="s-sec">0</b><span>ثانية</span></div></div>
+    <div class="target" id="tg"></div>
+    <div class="bar"><button class="btn ghost sm" type="button" id="again">↺ تمرين جديد</button><label class="muted" style="font-size:14px"><input type="checkbox" id="strict"> لازم أصحّح الغلط قبل ما أكمّل</label></div>
+    ${kbHtml()}
+  </section>`;
+  $$('[data-l]').forEach(b => b.onclick = () => { LK = +b.dataset.l; vKeys(); });
+  const start = () => typer($('#tg'), lessonText(L), { stopOnError: $('#strict').checked, onTick: s => { $('#s-wpm').textContent = Math.round(s.wpm); $('#s-acc').textContent = Math.round(s.acc) + '%'; $('#s-err').textContent = s.errs; $('#s-sec').textContent = s.sec; },
+    onDone: s => { logRun('keys', s.wpm, s.acc, { l: LK }); P.lessons[LK] = Math.max(P.lessons[LK] || 0, Math.round(s.wpm)); save(); toast(s.acc >= 95 ? `ممتاز! ${Math.round(s.wpm)} كلمة/دقيقة بدقّة ${Math.round(s.acc)}%` : `دقّتك ${Math.round(s.acc)}%. ركّز على الدقّة قبل السرعة`); setTimeout(() => { if ($('#tg')) start(); }, 1600); } });
+  $('#tg').onclick = focusTrap; $('#again').onclick = start; $('#strict').onchange = start;
+  start();
+}
+
+/* 2 · spelling: meaning + sound → type the word */
+const WS = { set: 'all', q: [], k: 0, ok: 0, n: 0, shown: false };
+function wordPool() {
+  if (WS.set === 'all') return shuffle(W.map(w => w.i)).slice(0, 20);
+  const n = +WS.set; return shuffle(STORIES[n - 1].words).slice(0, 20);
+}
+function vWords() {
+  if (!WS.q.length || WS.k >= WS.q.length) { WS.q = wordPool(); WS.k = 0; WS.ok = 0; WS.n = 0; }
+  const i = WS.q[WS.k], w = W[i];
+  main.innerHTML = `<section class="sheet">
+    <div class="head"><h1>كتابة الكلمات</h1><p>اسمع الكلمة وشوف معناها، اكتبها بالإنجليزي، واضغط <span class="kbd">Enter</span>. <span class="kbd">Ctrl</span>+<span class="kbd">Space</span> بيعيد الصوت.</p></div>
+    <div class="bar"><select id="wset" aria-label="الكلمات من">${['<option value="all">من كل القصص</option>', ...STORIES.map(s => `<option value="${s.n}">القصة ${AR(s.n)} · ${esc(s.en)}</option>`)].join('')}</select><span class="muted num">كلمة ${AR(WS.k + 1)} من ${AR(WS.q.length)} · صح ${AR(WS.ok)}</span></div>
+    <div class="progress"><i style="width:${Math.round(100 * WS.k / WS.q.length)}%"></i></div>
+    <div class="prompt"><button class="say" type="button" id="say" aria-label="اسمع">${SPK}</button><button class="say slow" type="button" id="slow" aria-label="اسمع ببطء" title="ببطء">🐢</button><div class="ar">${esc(w.m)}</div><div class="meta en">${esc(w.w.length)} letters${/\s/.test(w.w) ? ' · phrase' : ''}</div></div>
+    <input class="answer" id="ans" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type the word…" aria-label="اكتب الكلمة">
+    <div id="fb"></div>
+    <div class="bar"><button class="btn" type="button" id="check">تحقّق ↵</button><button class="btn ghost" type="button" id="hint">أول حرف</button><button class="btn ghost" type="button" id="skip">ما بعرف</button></div>
+    ${kbHtml()}
+  </section>`;
+  $('#wset').value = WS.set; $('#wset').onchange = e => { WS.set = e.target.value; WS.q = []; vWords(); };
+  const ans = $('#ans'); ans.focus(); WS.shown = false;
+  const say = (r = 1) => sayWord(i, r); setTimeout(() => say(), 200);
+  $('#say').onclick = () => { say(); ans.focus(); }; $('#slow').onclick = () => { say(.7); ans.focus(); };
+  ans.addEventListener('keydown', e => { pressFx(e.key === 'Backspace' ? '⌫' : e.key); if (e.key === 'Enter') { e.preventDefault(); WS.shown ? next() : check(); } if (e.key === ' ' && e.ctrlKey) { e.preventDefault(); say(); } });
+  ans.addEventListener('input', () => markNext(w.w[ans.value.length] ?? null));
+  ans.addEventListener('paste', e => e.preventDefault());
+  markNext(w.w[0]);
+  const next = () => { WS.k++; vWords(); };
+  const check = (skip) => {
+    if (WS.shown) return next();
+    const typed = ans.value, ok = !skip && normW(typed) === normW(w.w);
+    WS.n++; P.words.n++; if (ok) { WS.ok++; P.words.ok++; } else [...w.w.toLowerCase()].forEach((c, k) => { if (typed.toLowerCase()[k] !== c) missKey(c); });
+    save(); WS.shown = true; ans.classList.add(ok ? 'ok' : 'bad'); ans.readOnly = true;
+    $('#fb').innerHTML = `<div class="fb ${ok ? 'ok' : 'bad'}"><b>${ok ? 'صح ✓' : 'الصح:'}</b>${ok ? '' : `<div class="diff">${charDiff(w.w, typed)}</div>`}<span class="muted" style="font-size:14px">${esc(w.p)} · اضغط Enter للكلمة الجاية</span></div>`;
+    $('#check').textContent = 'التالية ↵'; say(); ans.focus();
+    if (WS.k === WS.q.length - 1) setTimeout(() => toast(`خلصت الجولة: ${WS.ok} من ${WS.n} صح`), 400);
+  };
+  $('#check').onclick = () => check(); $('#skip').onclick = () => check(true);
+  $('#hint').onclick = () => { ans.value = w.w[0]; ans.focus(); markNext(w.w[1]); };
+}
+function charDiff(target, typed) {
+  const a = target, b = typed.trim(), al = a.toLowerCase(), bl = b.toLowerCase();
+  const d = Array.from({ length: al.length + 1 }, (_, i) => [i, ...Array(bl.length).fill(0)]); for (let j = 1; j <= bl.length; j++) d[0][j] = j;
+  for (let i = 1; i <= al.length; i++) for (let j = 1; j <= bl.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (al[i - 1] === bl[j - 1] ? 0 : 1));
+  let i = al.length, j = bl.length; const out = [];
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && al[i - 1] === bl[j - 1] && d[i][j] === d[i - 1][j - 1]) { out.unshift(`<span class="ok">${esc(a[i - 1])}</span>`); i--; j--; }
+    else if (i > 0 && j > 0 && d[i][j] === d[i - 1][j - 1] + 1) { out.unshift(`<span class="miss">${esc(a[i - 1])}</span>`); i--; j--; }
+    else if (i > 0 && d[i][j] === d[i - 1][j] + 1) { out.unshift(`<span class="miss">${esc(a[i - 1])}</span>`); i--; }
+    else { out.unshift(`<span class="x">${esc(b[j - 1])}</span>`); j--; }
+  }
+  return out.join('');
+}
+
+/* 3 · dictation: hear a story sentence → type it */
+const DS = { sn: 1, q: [], k: 0, score: 0, n: 0 };
+function sentList(sn) { const s = STORIES[sn - 1], out = []; s.ss.forEach((p, pi) => p.forEach((x, j) => { const t = plain(x); if (t.split(' ').length >= 3) out.push({ sn, p: pi, j, t }); })); return out; }
+function vDict() {
+  if (!DS.q.length || DS.k >= DS.q.length) { DS.q = sentList(DS.sn).slice(0, 12); DS.k = 0; DS.score = 0; DS.n = 0; }
+  const it = DS.q[DS.k];
+  main.innerHTML = `<section class="sheet">
+    <div class="head"><h1>الإملاء</h1><p>اسمع الجملة من القصة (بنفس الصوت المسجّل) واكتبها كاملة. الأحرف الكبيرة والعلامات ما بتأثّر على العلامة إلا إذا شغّلت «تصحيح صارم». <span class="kbd">Ctrl</span>+<span class="kbd">Space</span> بيعيد الجملة.</p></div>
+    <div class="bar"><select id="dset" aria-label="القصة">${STORIES.map(s => `<option value="${s.n}">القصة ${AR(s.n)} · ${esc(s.en)}</option>`).join('')}</select><span class="muted num">جملة ${AR(DS.k + 1)} من ${AR(DS.q.length)}${DS.n ? ` · المعدّل ${AR(Math.round(DS.score / DS.n))}٪` : ''}</span><label class="muted" style="font-size:14px"><input type="checkbox" id="strict"> تصحيح صارم</label></div>
+    <div class="progress"><i style="width:${Math.round(100 * DS.k / DS.q.length)}%"></i></div>
+    <div class="prompt"><button class="say" type="button" id="say" aria-label="اسمع الجملة">${SPK}</button><button class="say slow" type="button" id="slow" aria-label="ببطء">🐢</button><div class="meta">${AR(it.t.split(' ').length)} كلمات · اسمعها قد ما بدك</div></div>
+    <textarea class="answer" id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="type what you hear…" aria-label="اكتب الجملة"></textarea>
+    <div id="fb"></div>
+    <div class="bar"><button class="btn" type="button" id="check">صحّح ↵</button><button class="btn ghost" type="button" id="show">فرجيني أول كلمتين</button></div>
+  </section>`;
+  $('#dset').value = DS.sn; $('#dset').onchange = e => { DS.sn = +e.target.value; DS.q = []; vDict(); };
+  const say = (r = 1) => playSentence(it.sn, it.p, it.j, r); setTimeout(() => say(), 250);
+  $('#say').onclick = () => { say(); $('#ans').focus(); }; $('#slow').onclick = () => { say(.75); $('#ans').focus(); };
+  const ans = $('#ans'); ans.focus(); let shown = false;
+  ans.addEventListener('paste', e => e.preventDefault());
+  ans.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); shown ? (DS.k++, vDict()) : check(); } if (e.key === ' ' && e.ctrlKey) { e.preventDefault(); say(); } });
+  $('#show').onclick = () => { if (!ans.value) ans.value = it.t.split(' ').slice(0, 2).join(' ') + ' '; ans.focus(); };
+  const check = () => {
+    const strict = $('#strict').checked, r = wordDiff(it.t, ans.value, strict);
+    DS.n++; DS.score += r.pct; P.dict.n++; P.dict.ok += r.pct >= 100 ? 1 : 0; save(); shown = true;
+    $('#fb').innerHTML = `<div class="fb ${r.pct >= 90 ? 'ok' : 'bad'}"><b>${AR(r.pct)}٪ صح</b><div class="diff">${r.html}</div><span class="muted" style="font-size:14px">الأخضر صح، المشطوب كلمة زيادة، وتحت الخط كلمة ناقصة أو غلط. Enter للجملة الجاية.</span></div>`;
+    $('#check').textContent = 'الجملة الجاية ↵'; $('#check').onclick = () => { DS.k++; vDict(); };
+  };
+  $('#check').onclick = check;
+}
+function wordDiff(target, typed, strict) {
+  const tk = s => s.trim().split(/\s+/).filter(Boolean);
+  const T = tk(target), Y = tk(typed), key = x => strict ? x : x.toLowerCase().replace(/[^a-z0-9']/g, '');
+  const a = T.map(key), b = Y.map(key);
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]); for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+  let i = a.length, j = b.length, ok = 0; const out = [];
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && a[i - 1] === b[j - 1] && d[i][j] === d[i - 1][j - 1]) { out.unshift(`<span class="ok">${esc(T[i - 1])}</span>`); ok++; i--; j--; }
+    else if (i > 0 && j > 0 && d[i][j] === d[i - 1][j - 1] + 1) { out.unshift(`<span class="x">${esc(Y[j - 1])}</span> <span class="miss">${esc(T[i - 1])}</span>`); i--; j--; }
+    else if (i > 0 && d[i][j] === d[i - 1][j] + 1) { out.unshift(`<span class="miss">${esc(T[i - 1])}</span>`); i--; }
+    else { out.unshift(`<span class="x">${esc(Y[j - 1])}</span>`); j--; }
+  }
+  const pct = Math.max(0, Math.round(100 * (ok - Math.max(0, b.length - a.length) * .5) / Math.max(1, a.length)));
+  return { html: out.join(' '), pct };
+}
+
+/* 4 · copy & speed */
+const CP = { sn: 0, mode: 'para', mins: 2, timer: 0 };
+function paraText() {
+  const s = CP.sn ? STORIES[CP.sn - 1] : rnd(STORIES);
+  if (CP.mode === 'para') { const p = rnd(s.p.filter(x => plain(x[0]).length > 120)) || s.p[0]; return { s, t: plain(p[0]) }; }
+  let t = ''; const ps = s.p.map(x => plain(x[0])); let k = Math.random() * ps.length | 0; while (t.length < 1400) { t += (t ? ' ' : '') + ps[k % ps.length]; k++; } return { s, t };
+}
+function vCopy() {
+  const { s, t } = paraText();
+  main.innerHTML = `<section class="sheet">
+    <div class="head"><h1>النسخ والسرعة</h1><p>اكتب النص متل ما هو. الساعة بتبلّش مع أول حرف. الهدف بالاختبارات عادة دقّة فوق ٩٥٪ قبل السرعة.</p></div>
+    <div class="bar"><select id="cmode" aria-label="نوع التمرين"><option value="para">فقرة وحدة</option><option value="timed">مؤقّت</option></select><select id="cmins" aria-label="المدّة"><option value="1">دقيقة</option><option value="2">دقيقتين</option><option value="3">٣ دقايق</option><option value="5">٥ دقايق</option></select><select id="cstory" aria-label="القصة"><option value="0">قصة عشوائية</option>${STORIES.map(x => `<option value="${x.n}">القصة ${AR(x.n)} · ${esc(x.en)}</option>`).join('')}</select><button class="btn ghost sm" type="button" id="new">↺ نص جديد</button></div>
+    <div class="stats"><div class="stat"><b class="num" id="s-wpm">0</b><span>كلمة/دقيقة</span></div><div class="stat"><b class="num" id="s-acc">100%</b><span>الدقّة</span></div><div class="stat"><b class="num" id="s-err">0</b><span>أغلاط</span></div><div class="stat"><b class="num" id="s-sec">${CP.mode === 'timed' ? CP.mins * 60 : 0}</b><span>${CP.mode === 'timed' ? 'ثانية باقية' : 'ثانية'}</span></div></div>
+    <div class="progress"><i id="cprog" style="width:0%"></i></div>
+    <div class="target" id="tg"></div>
+    <p class="note">من: القصة ${AR(s.n)} · ${esc(s.en)}</p>
+    <div id="rep"></div>
+    ${kbHtml()}
+  </section>`;
+  $('#cmode').value = CP.mode; $('#cmins').value = CP.mins; $('#cstory').value = CP.sn; $('#cmins').disabled = CP.mode !== 'timed';
+  $('#cmode').onchange = e => { CP.mode = e.target.value; vCopy(); }; $('#cmins').onchange = e => { CP.mins = +e.target.value; vCopy(); }; $('#cstory').onchange = e => { CP.sn = +e.target.value; vCopy(); }; $('#new').onclick = vCopy;
+  $('#tg').onclick = focusTrap;
+  const finish = st => { clearInterval(CP.timer); TS.done = true; TS.t1 = TS.t1 || Date.now(); logRun('copy', st.wpm, st.acc, { mode: CP.mode });
+    const worst = Object.entries(TS.keyErr).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    $('#rep').innerHTML = `<div class="fb ${st.acc >= 95 ? 'ok' : 'bad'}"><b>${Math.round(st.wpm)} كلمة بالدقيقة · دقّة ${Math.round(st.acc)}%</b><span>${st.acc >= 95 ? 'دقّة ممتازة. جرّب تزيد السرعة شوي.' : 'خفّف السرعة شوي وركّز على الدقّة، هي الأهم بالاختبار.'}${worst.length ? ` أكتر مفاتيح غلطت فيها: ${worst.map(([k, n]) => `<span class="kbd">${esc(k === ' ' ? 'space' : k)}</span>×${n}`).join(' ')}` : ''}</span><div class="bar"><button class="btn sm" type="button" id="again">نص جديد</button></div></div>`;
+    $('#again').onclick = vCopy; markNext(null); };
+  typer($('#tg'), t, { onTick: st => { $('#s-wpm').textContent = Math.round(st.wpm); $('#s-acc').textContent = Math.round(st.acc) + '%'; $('#s-err').textContent = st.errs; $('#cprog').style.width = Math.round(100 * st.prog) + '%'; if (CP.mode !== 'timed') $('#s-sec').textContent = st.sec; }, onDone: finish });
+  if (CP.mode === 'timed') { clearInterval(CP.timer); CP.timer = setInterval(() => { if (!TS || !$('#tg')) return clearInterval(CP.timer); if (!TS.t0) return; const left = CP.mins * 60 - Math.floor((Date.now() - TS.t0) / 1000); $('#s-sec').textContent = Math.max(0, left); if (left <= 0) finish(liveStats()); }, 250); }
+}
+
+/* 5 · mock exam: 15 minutes, no help */
+const EXAM = { timer: 0, state: null };
+function vExam() {
+  const E = EXAM.state;
+  if (!E) {
+    main.innerHTML = `<section class="sheet"><div class="head"><h1>اختبار تجريبي</h1><p>متل الاختبار الإلكتروني: ١٥ دقيقة، بدون تلميحات، وما في رجعة لسؤال خلص. ثلاث أقسام بالترتيب:</p></div>
+      <table class="tbl"><tr><th>القسم</th><th>شو بتعمل</th><th>العدد</th></tr><tr><td>١ · الكلمات</td><td>تسمع الكلمة وتشوف معناها وتكتبها</td><td class="n">10</td></tr><tr><td>٢ · الإملاء</td><td>تسمع جملة من قصة وتكتبها (مرتين سماع بس)</td><td class="n">5</td></tr><tr><td>٣ · النسخ</td><td>تكتب فقرة والساعة شغّالة</td><td class="n">1</td></tr></table>
+      <p class="note">نصيحة: اقعد مستقيم، حط أصابعك على صف الأساس، وما تطّلع على الكيبورد.</p>
+      <div class="bar"><button class="btn" type="button" id="start">ابدأ الاختبار</button></div></section>`;
+    $('#start').onclick = () => { const st = rnd(STORIES); EXAM.state = { t0: Date.now(), part: 0, k: 0, words: shuffle(W.map(w => w.i)).slice(0, 10), sents: shuffle(sentList(st.n).concat(sentList(rnd(STORIES).n))).slice(0, 5), para: plain(rnd(rnd(STORIES).p.filter(x => plain(x[0]).length > 180))?.[0] || STORIES[0].p[0][0]), res: { w: [], d: [], c: null } }; vExam(); };
+    return;
+  }
+  const left = () => Math.max(0, 900 - Math.floor((Date.now() - E.t0) / 1000));
+  const clock = () => { const l = left(); const el = $('#clock'); if (el) el.textContent = `${String(l / 60 | 0).padStart(2, '0')}:${String(l % 60).padStart(2, '0')}`; if (l <= 0) { clearInterval(EXAM.timer); E.part = 3; examReport(); } };
+  clearInterval(EXAM.timer); EXAM.timer = setInterval(clock, 500);
+  const shell = (title, inner) => { main.innerHTML = `<section class="sheet"><div class="head"><h1>${title}</h1><span class="kbd num" id="clock" style="font-size:20px">15:00</span></div><div class="progress"><i style="width:${Math.round(100 * ((E.part === 0 ? E.k : E.part === 1 ? 10 + E.k : 15)) / 16)}%"></i></div>${inner}</section>`; clock(); };
+  if (E.part === 0) {
+    const i = E.words[E.k], w = W[i];
+    shell(`القسم ١ · الكلمة ${AR(E.k + 1)} من ١٠`, `<div class="prompt"><button class="say" type="button" id="say" aria-label="اسمع">${SPK}</button><div class="ar">${esc(w.m)}</div></div><input class="answer" id="ans" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="اكتب الكلمة"><div class="bar"><button class="btn" type="button" id="nx">التالي ↵</button></div>`);
+    setTimeout(() => sayWord(i), 200); $('#say').onclick = () => { sayWord(i); $('#ans').focus(); };
+    const go = () => { const v = $('#ans').value; E.res.w.push({ i, v, ok: normW(v) === normW(w.w) }); E.k++; if (E.k >= 10) { E.part = 1; E.k = 0; } vExam(); };
+    $('#ans').focus(); $('#ans').addEventListener('paste', e => e.preventDefault()); $('#ans').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } }); $('#nx').onclick = go;
+  } else if (E.part === 1) {
+    const it = E.sents[E.k]; let plays = 0;
+    shell(`القسم ٢ · الجملة ${AR(E.k + 1)} من ٥`, `<div class="prompt"><button class="say" type="button" id="say" aria-label="اسمع">${SPK}</button><div class="meta" id="pl">بتقدر تسمعها مرتين</div></div><textarea class="answer" id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="اكتب الجملة"></textarea><div class="bar"><button class="btn" type="button" id="nx">التالي ↵</button></div>`);
+    const play = () => { if (!$('#pl')) return; if (plays >= 2) return toast('سمعتها مرتين'); plays++; $('#pl').textContent = plays >= 2 ? 'خلصت مرّات السماع' : 'باقي مرّة وحدة'; playSentence(it.sn, it.p, it.j); };
+    setTimeout(play, 250); $('#say').onclick = () => { play(); $('#ans').focus(); };
+    const go = () => { const v = $('#ans').value; E.res.d.push({ it, v, r: wordDiff(it.t, v, false) }); E.k++; if (E.k >= 5) { E.part = 2; E.k = 0; } vExam(); };
+    $('#ans').focus(); $('#ans').addEventListener('paste', e => e.preventDefault()); $('#ans').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); } }); $('#nx').onclick = go;
+  } else if (E.part === 2) {
+    shell('القسم ٣ · انسخ الفقرة', `<div class="target" id="tg"></div><div class="bar"><button class="btn ghost" type="button" id="fin">سلّم الاختبار</button></div>${kbHtml()}`);
+    $('#tg').onclick = focusTrap;
+    const done = st => { E.res.c = st; E.part = 3; clearInterval(EXAM.timer); examReport(); };
+    typer($('#tg'), E.para, { onDone: done }); $('#fin').onclick = () => done(liveStats());
+  } else examReport();
+}
+function examReport() {
+  const E = EXAM.state; if (!E) return; clearInterval(EXAM.timer); TS = null;
+  const wOk = E.res.w.filter(x => x.ok).length, wN = E.res.w.length, dAvg = E.res.d.length ? Math.round(E.res.d.reduce((a, x) => a + x.r.pct, 0) / E.res.d.length) : 0, c = E.res.c;
+  const total = Math.round(.35 * (wN ? 100 * wOk / 10 : 0) + .35 * (E.res.d.length ? dAvg * E.res.d.length / 5 : 0) + .3 * (c ? Math.min(100, c.acc) * c.prog : 0));
+  if (c) logRun('exam', c.wpm, c.acc, { score: total });
+  main.innerHTML = `<section class="sheet report"><div class="head"><h1>تقرير الاختبار</h1><span class="kbd num" style="font-size:22px">${total}/100</span></div>
+    <div class="stats"><div class="stat"><b class="num">${wOk}/10</b><span>الكلمات</span></div><div class="stat"><b class="num">${dAvg}%</b><span>الإملاء</span></div><div class="stat"><b class="num">${c ? Math.round(c.wpm) : '–'}</b><span>سرعة النسخ (ك/د)</span></div><div class="stat"><b class="num">${c ? Math.round(c.acc) + '%' : '–'}</b><span>دقّة النسخ</span></div></div>
+    <h2 style="font-size:19px">الكلمات</h2><div class="tblw"><table class="tbl"><tr><th>المعنى</th><th>الصح</th><th>كتبت</th><th></th></tr>${E.res.w.map(x => `<tr><td>${esc(W[x.i].m)}</td><td class="en">${esc(W[x.i].w)}</td><td class="en">${esc(x.v || '—')}</td><td>${x.ok ? '✅' : '❌'}</td></tr>`).join('')}</table></div>
+    <h2 style="font-size:19px">الإملاء</h2>${E.res.d.map(x => `<div class="fb ${x.r.pct >= 90 ? 'ok' : 'bad'}"><b>${AR(x.r.pct)}٪</b><div class="diff">${x.r.html}</div></div>`).join('') || '<p class="note">ما وصلت لهالقسم.</p>'}
+    <div class="bar"><button class="btn" type="button" id="again">اختبار جديد</button><a class="btn ghost" href="#stats">إحصائياتي</a></div></section>`;
+  EXAM.state = null; $('#again').onclick = () => vExam();
+}
+
+/* 6 · stats */
+function vStats() {
+  const runs = P.runs.filter(r => r.kind === 'copy' || r.kind === 'exam').slice(-30);
+  const W0 = 600, H0 = 150, pad = 28, mx = Math.max(30, ...runs.map(r => r.wpm));
+  const pts = runs.map((r, k) => [pad + (runs.length < 2 ? 0 : k * (W0 - 2 * pad) / (runs.length - 1)), H0 - pad - (H0 - 2 * pad) * r.wpm / mx]);
+  const path = pts.map((p, k) => (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const area = pts.length ? path + ` L${pts[pts.length - 1][0].toFixed(1)} ${H0 - pad} L${pts[0][0].toFixed(1)} ${H0 - pad} Z` : '';
+  main.innerHTML = `<section class="sheet"><div class="head"><h1>إحصائياتي</h1><p>محفوظة بهالمتصفح بس.</p></div>
+    <div class="stats"><div class="stat"><b class="num">${P.best || '–'}</b><span>أفضل سرعة (ك/د)</span></div><div class="stat"><b class="num">${runs.length ? Math.round(runs.reduce((a, r) => a + r.acc, 0) / runs.length) + '%' : '–'}</b><span>معدّل الدقّة</span></div><div class="stat"><b class="num">${P.words.n ? Math.round(100 * P.words.ok / P.words.n) + '%' : '–'}</b><span>الكلمات صح (${AR(P.words.n)})</span></div><div class="stat"><b class="num">${AR(P.dict.n)}</b><span>جمل إملاء</span></div></div>
+    <h2 style="font-size:19px">سرعتك بآخر ${AR(runs.length)} تمرين نسخ واختبار</h2>
+    ${runs.length ? `<svg class="chart" viewBox="0 0 ${W0} ${H0}" preserveAspectRatio="none" role="img" aria-label="تطوّر السرعة"><line x1="${pad}" x2="${W0 - pad}" y1="${H0 - pad}" y2="${H0 - pad}" stroke="var(--line)"/><line x1="${pad}" x2="${W0 - pad}" y1="${pad}" y2="${pad}" stroke="var(--line)" stroke-dasharray="3 5"/><text x="${pad}" y="${pad - 8}" fill="var(--muted)" font-size="12" font-family="IBM Plex Mono">${mx} wpm</text><path d="${area}" fill="var(--accent)" opacity=".12"/><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5"/>${pts.length ? `<circle cx="${pts[pts.length - 1][0]}" cy="${pts[pts.length - 1][1]}" r="5" fill="var(--accent)"/>` : ''}</svg>` : '<p class="note">لسا ما في تمارين نسخ. جرّب «النسخ والسرعة».</p>'}
+    <h2 style="font-size:19px">المفاتيح اللي بتغلط فيها</h2><p class="note">كل ما كان المفتاح أحمر أكتر، كل ما غلطت فيه أكتر. الرقم الصغير عدد الأغلاط.</p>
+    ${kbHtml(P.miss)}
+    <div class="bar"><button class="btn ghost sm" type="button" id="reset">صفّر الإحصائيات</button><span id="rs"></span></div></section>`;
+  $('#reset').onclick = () => { $('#rs').innerHTML = `<span class="muted">أكيد؟</span> <button class="btn sm" type="button" id="yes" style="background:var(--err)">نعم صفّر</button>`; $('#yes').onclick = () => { P = { runs: [], miss: {}, lessons: {}, words: { ok: 0, n: 0 }, dict: { ok: 0, n: 0 }, best: 0 }; save(); vStats(); }; };
+}
+
+route();
+})();
+</script>
+<script>if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});</script>
+</body>
+</html>

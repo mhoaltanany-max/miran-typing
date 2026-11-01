@@ -1,0 +1,30 @@
+name: Build offline ZIP
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pack the site into one folder
+        run: |
+          mkdir -p out/miran-typing
+          cp -r index.html data.js sw.js a s out/miran-typing/
+          printf 'افتح الملف index.html بمتصفح Chrome أو Edge. بيشتغل بدون نت.\r\n' > out/miran-typing/اقرأني.txt
+          cd out && zip -qr ../miran-typing.zip miran-typing && cd .. && ls -la miran-typing.zip
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.${{ github.run_number }}
+          name: مران الكتابة ${{ github.run_number }}
+          body: نزّل miran-typing.zip، فك الضغط، وافتح index.html بمتصفح Chrome أو Edge. بيشتغل كامل بدون نت.
+          files: miran-typing.zip
+          make_latest: true
+          target_commitish: ${{ github.sha }}
